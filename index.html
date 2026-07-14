@@ -2,136 +2,612 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Evaluación Asesores - Grupo Ontiveros</title>
+    
+    <!-- Soporte para instalar en Pantalla de Inicio con el Logo de Davis -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Evaluación GO">
+    <link rel="apple-touch-icon" href="https://i.imgur.com/2Usc0vR.png">
+    <link rel="icon" type="image/png" href="https://i.imgur.com/2Usc0vR.png">
+
+    <!-- Librerías de Excel y PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     <style>
-        :root { --blue: #003366; --accent: #007BFF; --danger: #dc3545; }
-        body { font-family: sans-serif; background: #f4f7f6; padding: 15px; }
-        .card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h3 { color: var(--blue); border-bottom: 2px solid var(--accent); }
-        .grid-eval { display: grid; grid-template-columns: 2fr repeat(5, 0.4fr) 0.6fr; gap: 5px; align-items: center; font-size: 0.8em; margin: 5px 0; }
-        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; margin-top: 10px; border: none; border-radius: 6px; font-weight: bold; color: white; cursor: pointer; }
-        .btn-excel { background: var(--blue); }
-        .btn-pdf { background: var(--accent); }
-        .btn-clear { background: var(--danger); }
+        :root {
+            --blue-dark: #002244;
+            --blue-medium: #003366;
+            --blue-light: #0055a5;
+            --accent-blue: #e6f0fa;
+            --gray-bg: #f5f7fa;
+            --danger: #d9534f;
+        }
+
+        body {
+            font-family: 'Segoe UI', Calibri, sans-serif;
+            background-color: var(--gray-bg);
+            margin: 0;
+            padding: 15px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Estilo Cabecera App */
+        .app-header {
+            background: linear-gradient(135deg, var(--blue-dark), var(--blue-medium));
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            margin-bottom: 20px;
+        }
+
+        .app-header img {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 10px;
+        }
+
+        .app-header h1 {
+            margin: 0;
+            font-size: 1.6em;
+            letter-spacing: 1px;
+        }
+
+        .app-header p {
+            margin: 5px 0 0;
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        h2.section-title {
+            color: var(--blue-medium);
+            font-size: 1.2em;
+            border-left: 4px solid var(--blue-light);
+            padding-left: 10px;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        /* Campos de Entrada */
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: bold;
+            font-size: 0.85em;
+            color: var(--blue-medium);
+            margin-bottom: 4px;
+        }
+
+        input[type="text"], input[type="date"], textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccd5ae;
+            border-radius: 8px;
+            font-size: 0.95em;
+            box-sizing: border-box;
+            background-color: #fff;
+            transition: border 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            border-color: var(--blue-light);
+            outline: none;
+        }
+
+        /* Tabla de Evaluación Adaptada a Móvil */
+        .eval-item {
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+        }
+
+        .eval-item:last-child {
+            border-bottom: none;
+        }
+
+        .eval-label {
+            font-weight: 600;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+            color: #444;
+        }
+
+        .eval-scores {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr) 1.2fr;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .score-col {
+            text-align: center;
+        }
+
+        .score-col span {
+            display: block;
+            font-size: 0.7em;
+            color: #777;
+            margin-bottom: 2px;
+        }
+
+        select {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.9em;
+            background: var(--accent-blue);
+            color: var(--blue-dark);
+        }
+
+        .row-prom {
+            background-color: var(--blue-medium);
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            padding: 6px;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+
+        /* Sección Fotos */
+        .foto-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        @media(min-width: 600px) {
+            .foto-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        .foto-box {
+            background: #fafafa;
+            border: 1px dashed var(--blue-light);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            position: relative;
+        }
+
+        .foto-box label {
+            display: block;
+            font-weight: bold;
+            font-size: 0.8em;
+            margin-bottom: 6px;
+            color: var(--blue-medium);
+        }
+
+        .foto-box input[type="file"] {
+            font-size: 0.8em;
+            width: 100%;
+        }
+
+        /* Botonera */
+        .btn-group {
+            margin-top: 25px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1em;
+            cursor: pointer;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .btn-excel { background-color: var(--blue-medium); }
+        .btn-excel:active { background-color: var(--blue-dark); }
+        .btn-pdf { background-color: var(--blue-light); }
+        .btn-pdf:active { background-color: #003d7a; }
+        .btn-clear { background-color: var(--danger); }
+        .btn-clear:active { background-color: #bd362f; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2 style="color:var(--blue); text-align:center;">Ontiveros Group</h2>
-    <label>Fecha:</label><input type="date" id="fecha">
-    <label>Compañía:</label><input type="text" id="empresa">
-    <label>Vendedor:</label><input type="text" id="vendedor">
-    <label>Evaluador:</label><input type="text" id="evaluador">
+<div class="container">
+    
+    <!-- Cabecera Corporativa -->
+    <div class="app-header">
+        <img src="https://i.imgur.com/2Usc0vR.png" alt="Logo Grupo Ontiveros">
+        <h1>Grupo Ontiveros</h1>
+        <p>Sistema de Evaluación de Asesores de Venta</p>
+    </div>
+
+    <!-- PASO 1: Datos de Cabecera -->
+    <div class="card">
+        <h2 class="section-title">Datos Generales</h2>
+        <div class="input-group">
+            <label>Fecha de Evaluación</label>
+            <input type="date" id="fecha">
+        </div>
+        <div class="input-group">
+            <label>Empresa</label>
+            <input type="text" id="empresa" placeholder="Ej. Dipaca / Inversiones JOL">
+        </div>
+        <div class="input-group">
+            <label>Vendedor (Asesor de Venta)</label>
+            <input type="text" id="vendedor" placeholder="Nombre completo del asesor">
+        </div>
+        <div class="input-group">
+            <label>Evaluador (Supervisor)</label>
+            <input type="text" id="evaluador" placeholder="Nombre completo del evaluador">
+        </div>
+    </div>
+
+    <!-- PASO 2: Bloques de Evaluación Evaluativa -->
+    <div id="evaluation-blocks"></div>
+
+    <!-- PASO 5: Registro Fotográfico de Campo -->
+    <div class="card">
+        <h2 class="section-title">Reporte Fotográfico de Campo</h2>
+        <div class="foto-grid" id="foto-grid"></div>
+    </div>
+
+    <!-- PASO 4: Áreas Cualitativas -->
+    <div class="card">
+        <h2 class="section-title">Análisis de Desempeño</h2>
+        <div class="input-group">
+            <label>Fortalezas</label>
+            <textarea id="fortalezas" rows="4" placeholder="Escriba aquí los aspectos fuertes del asesor..."></textarea>
+        </div>
+        <div class="input-group" style="margin-top: 15px;">
+            <label>Debilidades</label>
+            <textarea id="debilidades" rows="4" placeholder="Escriba aquí las áreas de mejora..."></textarea>
+        </div>
+        <div class="input-group" style="margin-top: 15px;">
+            <label>Plan de Acción y Compromisos</label>
+            <textarea id="compromisos" rows="4" placeholder="Acuerdos y plan de trabajo inmediato..."></textarea>
+        </div>
+    </div>
+
+    <!-- Botonera de Acción -->
+    <div class="btn-group">
+        <button class="btn-excel" onclick="generarExcelFiel()">
+            📊 DESCARGAR EXCEL DE EVALUACIÓN
+        </button>
+        <button class="btn-pdf" onclick="generarPDFFotos()">
+            📸 DESCARGAR REPORTE FOTOGRÁFICO (PDF)
+        </button>
+        <button class="btn-clear" onclick="limpiarFormulario()">
+            🔄 LIMPIAR FORMULARIO / NUEVA EVALUACIÓN
+        </button>
+    </div>
+
 </div>
-
-<div id="eval-container"></div>
-
-<div class="card">
-    <h3>Registro Fotográfico</h3>
-    <div id="foto-container"></div>
-</div>
-
-<div class="card">
-    <label>Fortalezas:</label><textarea id="fortalezas" rows="3"></textarea>
-    <label>Debilidades:</label><textarea id="debilidades" rows="3"></textarea>
-    <label>Plan de acción y compromisos:</label><textarea id="compromisos" rows="3"></textarea>
-</div>
-
-<button class="btn-excel" onclick="generarExcel()">DESCARGAR EXCEL DE EVALUACIÓN</button>
-<button class="btn-pdf" onclick="generarPDF()">DESCARGAR REGISTRO PDF</button>
-<button class="btn-clear" onclick="location.reload()">LIMPIAR TODO</button>
 
 <script>
+    // Asignar fecha del sistema de forma automática al iniciar
     document.getElementById('fecha').valueAsDate = new Date();
-    const estructura = {
-        "Actitud de Ventas": ["Buena presencia y puntualidad", "Secuencia de visitas", "Asistencia a reuniones", "Organización material", "Toma pedidos", "Informa incidencias"],
-        "Pasos de la visita organizada": ["Preparación", "Contacto", "Chequeo Inventario", "Identificación Oportunidades", "Ejecución Merchandising", "Asesoramiento", "Cobranza y cierre"],
-        "Dominio de ventas": ["Gestiona portafolio", "Ofrece innovaciones", "Revisión indicadores precios", "Negociación espacios"],
-        "Profundidad de lineas": ["Marcas Parmalat/PAVECA/Polar/Pepsi", "Marcas Isola/Alfonzo Rivas", "Marcas Alinieve/Incosa/Alesca", "Marcas Miceven/Puig/Gaduca/Calven"]
+
+    const estructuraEvaluacion = {
+        "Actitud de Ventas": [
+            "Buena presencia y puntualidad",
+            "Secuencia de visitas de acuerdo al rutero",
+            "Asistencia a reuniones, auditorias, contacto 1 a 1",
+            "Organización y Uso de material de trabajo (Catalogo, Planificador, facturas, lista de precios)",
+            "Toma pedidos y cobranzas en el movil y sincroniza en los tiempos oportunos.",
+            "Informa las incideancias de la ruta al supervisor en los tiempos oportunos."
+        ],
+        "Pasos de la visita organizada": [
+            "Preparación de la visita (Planificacion mensual, semanal, diaria)",
+            "Contacto y acercamiento",
+            "Chequeo de Inventario",
+            "Identificación de oportunidades en el PDV",
+            "Ejecución del producto en stock de inventario (Merchandising)",
+            "Asesoramiento y negociación del pedido",
+            "Cobranza y cierre de la visita (Indicacion de Politicas)"
+        ],
+        "Dominio de ventas": [
+            "Gestiona todo el portafolio de productos",
+            "Ofrece innovaciones o promociones",
+            "Revisión y actualización de indicadores de precios en PDV",
+            "Negociacion de espacios adicionales"
+        ],
+        "Profundidad de lineas": [
+            "Ofrece Marcas Parmalat, PAVECA, Polar, Pepsi",
+            "Ofrece Marcas Isola, Alfonzo Rivas",
+            "Ofrece Marcas Alinieve/Giomar, Incosa, Alesca",
+            "Ofrece Marcas Miceven, Puig, Gaduca, Calven"
+        ]
     };
 
-    const container = document.getElementById('eval-container');
-    for (let [cat, items] of Object.entries(estructura)) {
-        let html = `<div class="card"><h3>${cat}</h3>`;
-        items.forEach(i => {
-            html += `<div class="grid-eval"><span>${i}</span>`;
-            for(let c=1; c<=5; c++) html += `<select id="p_${i}_${c}"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>`;
-            html += `<span>PROM</span></div>`;
+    const itemsFotograficos = [
+        "Buena presencia y puntualidad",
+        "Ejecución del producto en stock de inventario (Merchandising)",
+        "Presencia de material P.O.P vigente",
+        "Evalua el cumplimiento del Planograma de Marcas",
+        "Garantiza que los exhibidores o espacios negociados no esten invadidos",
+        "Fachada de PDV",
+        "Anaquel Principal",
+        "Checkout",
+        "Exhibicion Adicional"
+    ];
+
+    const fotosCargadas = {};
+
+    // Dibujar bloques de evaluación en pantalla
+    const evalContainer = document.getElementById('evaluation-blocks');
+    let catIndex = 1;
+
+    for (const [categoria, items] of Object.entries(estructuraEvaluacion)) {
+        let blockHtml = `
+            <div class="card">
+                <h2 class="section-title">${categoria}</h2>
+        `;
+
+        items.forEach((item, index) => {
+            const itemId = `item_${catIndex}_${index}`;
+            blockHtml += `
+                <div class="eval-item">
+                    <div class="eval-label">${item}</div>
+                    <div class="eval-scores">
+            `;
+            for (let c = 1; c <= 5; c++) {
+                blockHtml += `
+                    <div class="score-col">
+                        <span>C${c}</span>
+                        <select id="${itemId}_c${c}" onchange="calcularPromedioFila('${itemId}')">
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                        </select>
+                    </div>
+                `;
+            }
+            blockHtml += `
+                        <div class="score-col">
+                            <span>PROM</span>
+                            <div class="row-prom" id="${itemId}_prom">0.00</div>
+                        </div>
+                    </div>
+                </div>
+            `;
         });
-        container.innerHTML += html + `</div>`;
+
+        blockHtml += `</div>`;
+        evalContainer.innerHTML += blockHtml;
+        catIndex++;
     }
 
-    const itemsFoto = ["Buena presencia y puntualidad", "Ejecución Merchandising", "Material P.O.P vigente", "Planograma Marcas", "Exhibidores no invadidos", "Fachada PDV", "Anaquel Principal", "Checkout", "Exhibicion Adicional"];
-    itemsFoto.forEach(i => {
-        document.getElementById('foto-container').innerHTML += `<div><label>${i}</label><input type="file" accept="image/*" capture="environment"></div>`;
+    // Dibujar cargadores de fotos para móviles (con cámara trasera directa)
+    const fotoGrid = document.getElementById('foto-grid');
+    itemsFotograficos.forEach((fotoLabel, index) => {
+        const fileId = `foto_${index}`;
+        fotoGrid.innerHTML += `
+            <div class="foto-box">
+                <label>${fotoLabel}</label>
+                <input type="file" id="${fileId}" accept="image/*" capture="environment" onchange="procesarFoto('${fileId}', '${fotoLabel}')">
+            </div>
+        `;
     });
 
-    function generarExcel() {
-        const wb = XLSX.utils.book_new();
-        
-        // Mapeo exhaustivo fila por fila para asegurar fidelidad total
-        const datos = [
-            ["EVALUACION DE ASESOR DE VENTA"],
-            ["Fecha", document.getElementById('fecha').value],
-            ["Empresa", document.getElementById('empresa').value],
-            ["Vendedor", document.getElementById('vendedor').value],
-            ["Evaluador", document.getElementById('evaluador').value],
-            [],
-            ["Actitud de Ventas", "C1", "C2", "C3", "C4", "C5", "PROM 1"],
-            ["Buena presencia y puntualidad"], ["Secuencia de visitas de acuerdo al rutero"],
-            ["Asistencia a reuniones, auditorias, contacto 1 a 1"],
-            ["Organización y Uso de material de trabajo"],
-            ["Toma pedidos y cobranzas en el movil"], ["Informa las incideancias de la ruta"],
-            [],
-            ["Pasos de la visita organizada", "C1", "C2", "C3", "C4", "C5", "PROM 2"],
-            ["Preparación de la visita"], ["Contacto y acercamiento"], ["Chequeo de Inventario"],
-            ["Identificación de oportunidades en el PDV"], ["Ejecución del producto en stock"],
-            ["Asesoramiento y negociación del pedido"], ["Cobranza y cierre de la visita"],
-            [],
-            ["Dominio de ventas", "C1", "C2", "C3", "C4", "C5", "PROM 3"],
-            ["Gestiona todo el portafolio de productos"], ["Ofrece innovaciones o promociones"],
-            ["Revisión y actualización de indicadores de precios en PDV"], ["Negociacion de espacios adicionales"],
-            [],
-            ["Profundidad de lineas", "C1", "C2", "C3", "C4", "C5", "PROM 4"],
-            ["Ofrece Marcas Parmalat, PAVECA, Polar, Pepsi"], ["Ofrece Marcas Isola, Alfonzo Rivas"],
-            ["Ofrece Marcas Alinieve/Giomar, Incosa, Alesca"], ["Ofrece Marcas Miceven, Puig, Gaduca, Calven"],
-            [], ["Total Promedios"], [], ["Puntaje de evaluación"], ["0.- No cumple"],
-            ["1.- Deficiente"], ["2.- Regular"], ["3.- Bueno"], ["4.- Excelente"],
-            ["Nota: Puntuación Máxima de evaluación por item es igual a 4"], [],
-            ["Fortalezas"], [document.getElementById('fortalezas').value], [], [], [], [],
-            ["Debilidades"], [document.getElementById('debilidades').value], [], [], [], [],
-            ["Plan de accion y compromisos"], [document.getElementById('compromisos').value]
-        ];
-
-        const ws = XLSX.utils.aoa_to_sheet(datos);
-        XLSX.utils.book_append_sheet(wb, ws, "Evaluacion");
-        XLSX.writeFile(wb, "Evaluacion_" + (document.getElementById('vendedor').value || "Asesor") + ".xlsx");
+    // Procesar carga de fotos en memoria
+    function procesarFoto(inputId, label) {
+        const fileInput = document.getElementById(inputId);
+        const file = fileInput.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                fotosCargadas[label] = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
     }
 
+    // Calcular promedio horizontal fila por fila de forma automática
+    function calcularPromedioFila(itemId) {
+        let suma = 0;
+        for (let c = 1; c <= 5; c++) {
+            suma += parseInt(document.getElementById(`${itemId}_c${c}`).value) || 0;
+        }
+        const promedio = (suma / 5).toFixed(2);
+        document.getElementById(`${itemId}_prom`).innerText = promedio;
+    }
 
-    function generarPDF() {
+    // OBTENER VALORES SELECCIONADOS PARA GENERACIÓN FIEL
+    function obtenerValorCombo(catIdx, itemIdx, clienteIdx) {
+        return parseInt(document.getElementById(`item_${catIdx}_${itemIdx}_c${clienteIdx}`).value) || 0;
+    }
+
+    function obtenerPromedioFila(catIdx, itemIdx) {
+        let suma = 0;
+        for (let c = 1; c <= 5; c++) {
+            suma += obtenerValorCombo(catIdx, itemIdx, c);
+        }
+        return suma / 5;
+    }
+
+    // PASO 2 y 3: GENERAR EXCEL FIEL Y EXACTO (EVAL 1 GO DE LA HOJA 1)
+     function generarExcelFiel() {
+        const wb = XLSX.utils.book_new();
+        
+        // Obtenemos los valores de forma segura
+        const fechaVal = document.getElementById('fecha').value || "";
+        const empresaVal = document.getElementById('empresa').value || "";
+        const vendedorVal = document.getElementById('vendedor').value || "";
+        const evaluadorVal = document.getElementById('evaluador').value || "";
+        const fortVal = document.getElementById('fortalezas').value || "";
+        const debVal = document.getElementById('debilidades').value || "";
+        const compVal = document.getElementById('compromisos').value || "";
+
+        const d = [];
+
+        // Cabecera
+        d[0] = ["EVALUACION DE ASESOR DE VENTA"];
+        d[1] = ["Fecha", fechaVal];
+        d[2] = ["Empresa", empresaVal];
+        d[3] = ["Vendedor", vendedorVal];
+        d[4] = ["Evaluador", evaluadorVal];
+        d[5] = []; 
+
+        // Bloques (Sección 1 a 4)
+        const categorias = Object.keys(estructuraEvaluacion);
+        let filaActual = 6;
+
+        categorias.forEach((cat, catIdx) => {
+            d[filaActual] = [cat, "C1", "C2", "C3", "C4", "C5", "PROM"];
+            filaActual++;
+            estructuraEvaluacion[cat].forEach((item, itemIdx) => {
+                d[filaActual] = [
+                    item,
+                    obtenerValorCombo(catIdx + 1, itemIdx, 1),
+                    obtenerValorCombo(catIdx + 1, itemIdx, 2),
+                    obtenerValorCombo(catIdx + 1, itemIdx, 3),
+                    obtenerValorCombo(catIdx + 1, itemIdx, 4),
+                    obtenerValorCombo(catIdx + 1, itemIdx, 5),
+                    obtenerPromedioFila(catIdx + 1, itemIdx)
+                ];
+                filaActual++;
+            });
+            d[filaActual] = [];
+            filaActual++;
+        });
+
+        // Secciones finales cualitativas
+        d[filaActual] = ["Fortalezas"];
+        d[filaActual + 1] = [fortVal];
+        filaActual += 3;
+        d[filaActual] = ["Debilidades"];
+        d[filaActual + 1] = [debVal];
+        filaActual += 3;
+        d[filaActual] = ["Plan de accion y compromisos"];
+        d[filaActual + 1] = [compVal];
+
+         // Insertar secciones cualitativas en la matriz
+        d[filaActual] = ["FORTALEZAS"];
+        d[filaActual + 1] = [fortVal];
+        filaActual += 3;
+        
+        d[filaActual] = ["DEBILIDADES"];
+        d[filaActual + 1] = [debVal];
+        filaActual += 3;
+        
+        d[filaActual] = ["PLAN DE ACCIÓN Y COMPROMISOS"];
+        d[filaActual + 1] = [compVal];
+
+        const ws = XLSX.utils.aoa_to_sheet(d);
+        
+        // Ajuste de columnas para que se vea profesional
+        ws['!cols'] = [{ wch: 50 }, { wch: 8 }, { wch: 8 }, { wch: 8 }, { wch: 8 }, { wch: 8 }, { wch: 10 }];
+
+        XLSX.utils.book_append_sheet(wb, ws, "Evaluacion");
+        XLSX.writeFile(wb, `Evaluacion_${vendedorVal || "Asesor"}.xlsx`);
+    }
+
+    // PASO 5: GENERAR PDF DE FOTOS ORGANIZADO INDEPENDIENTE
+    function generarPDFFotos() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        doc.text("Evaluación: " + document.getElementById('vendedor').value, 10, 10);
-        doc.save("Evaluacion_" + (document.getElementById('vendedor').value || "Asesor") + ".pdf");
+        const nombreVendedor = document.getElementById('vendedor').value || "Asesor";
+        const empresa = document.getElementById('empresa').value || "Grupo Ontiveros";
+        const evaluador = document.getElementById('evaluador').value || "Supervisor";
+        const fechaVal = document.getElementById('fecha').value || new Date().toLocaleDateString();
+
+        // Cabecera PDF
+        doc.setFillColor(0, 34, 68);
+        doc.rect(0, 0, 210, 35, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(18);
+        doc.text("GRUPO ONTIVEROS", 15, 15);
+        doc.setFontSize(10);
+        doc.text("REPORTE FOTOGRÁFICO DE AUDITORÍA EN CAMPO", 15, 22);
+        doc.text(`Fecha: ${fechaVal} | Empresa: ${empresa}`, 15, 28);
+
+        // Info Asesor
+        doc.setTextColor(50, 50, 50);
+        doc.setFontSize(11);
+        doc.text(`Vendedor Auditado: ${nombreVendedor}`, 15, 45);
+        doc.text(`Evaluador / Supervisor: ${evaluador}`, 15, 51);
+
+        doc.setLineWidth(0.5);
+        doc.setDrawColor(0, 85, 165);
+        doc.line(15, 55, 195, 55);
+
+        let posX = 15;
+        let posY = 65;
+        let control = 0;
+
+        itemsFotograficos.forEach((label) => {
+            const b64Img = fotosCargadas[label];
+            if (b64Img) {
+                // Dibujar el título de la foto
+                doc.setFontSize(9);
+                doc.setTextColor(0, 51, 102);
+                doc.setFont("Helvetica", "Bold");
+                doc.text(label, posX, posY - 2);
+
+                // Añadir imagen al lienzo PDF
+                doc.addImage(b64Img, 'JPEG', posX, posY, 85, 65);
+                
+                // Mapear posición de cuadrícula (2 fotos por fila)
+                control++;
+                if (control % 2 === 0) {
+                    posX = 15;
+                    posY += 80; // Nueva fila vertical
+                } else {
+                    posX = 110; // Desplazar al lado derecho
+                }
+
+                // Si se llena la página, crear una nueva
+                if (posY > 240) {
+                    doc.addPage();
+                    posX = 15;
+                    posY = 20;
+                }
+            }
+        });
+
+        if(control === 0) {
+            alert("Por favor, cargue al menos una fotografía para generar el reporte PDF.");
+            return;
+        }
+
+        doc.save(`Evaluacion_${nombreVendedor}.pdf`);
+    }
+
+    // BOTÓN LIMPIAR COMPLETO (RECARGA LA INSTANCIA DE EVALUACIÓN LIMPIA)
+    function limpiarFormulario() {
+        if (confirm("¿Está seguro que desea limpiar todo el formulario para iniciar una nueva evaluación? Se perderán los datos actuales.")) {
+            location.reload();
+        }
     }
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
 
