@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Evaluación Asesores - Grupo Ontiveros</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root { --blue: #003366; --accent: #007BFF; --danger: #dc3545; }
+        body { font-family: sans-serif; background: #f4f7f6; padding: 15px; }
+        .card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h3 { color: var(--blue); border-bottom: 2px solid var(--accent); }
+        .grid-eval { display: grid; grid-template-columns: 2fr repeat(5, 0.4fr) 0.6fr; gap: 5px; align-items: center; font-size: 0.8em; margin: 5px 0; }
+        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; margin-top: 10px; border: none; border-radius: 6px; font-weight: bold; color: white; cursor: pointer; }
+        .btn-excel { background: var(--blue); }
+        .btn-pdf { background: var(--accent); }
+        .btn-clear { background: var(--danger); }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2 style="color:var(--blue); text-align:center;">Ontiveros Group</h2>
+    <label>Fecha:</label><input type="date" id="fecha">
+    <label>Compañía:</label><input type="text" id="empresa">
+    <label>Vendedor:</label><input type="text" id="vendedor">
+    <label>Evaluador:</label><input type="text" id="evaluador">
+</div>
+
+<div id="eval-container"></div>
+
+<div class="card">
+    <h3>Registro Fotográfico</h3>
+    <div id="foto-container"></div>
+</div>
+
+<div class="card">
+    <label>Fortalezas:</label><textarea id="fortalezas" rows="3"></textarea>
+    <label>Debilidades:</label><textarea id="debilidades" rows="3"></textarea>
+    <label>Plan de acción y compromisos:</label><textarea id="compromisos" rows="3"></textarea>
+</div>
+
+<button class="btn-excel" onclick="generarExcel()">DESCARGAR EXCEL DE EVALUACIÓN</button>
+<button class="btn-pdf" onclick="generarPDF()">DESCARGAR REGISTRO PDF</button>
+<button class="btn-clear" onclick="location.reload()">LIMPIAR TODO</button>
+
+<script>
+    document.getElementById('fecha').valueAsDate = new Date();
+    const estructura = {
+        "Actitud de Ventas": ["Buena presencia y puntualidad", "Secuencia de visitas", "Asistencia a reuniones", "Organización material", "Toma pedidos", "Informa incidencias"],
+        "Pasos de la visita organizada": ["Preparación", "Contacto", "Chequeo Inventario", "Identificación Oportunidades", "Ejecución Merchandising", "Asesoramiento", "Cobranza y cierre"],
+        "Dominio de ventas": ["Gestiona portafolio", "Ofrece innovaciones", "Revisión indicadores precios", "Negociación espacios"],
+        "Profundidad de lineas": ["Marcas Parmalat/PAVECA/Polar/Pepsi", "Marcas Isola/Alfonzo Rivas", "Marcas Alinieve/Incosa/Alesca", "Marcas Miceven/Puig/Gaduca/Calven"]
+    };
+
+    const container = document.getElementById('eval-container');
+    for (let [cat, items] of Object.entries(estructura)) {
+        let html = `<div class="card"><h3>${cat}</h3>`;
+        items.forEach(i => {
+            html += `<div class="grid-eval"><span>${i}</span>`;
+            for(let c=1; c<=5; c++) html += `<select id="p_${i}_${c}"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>`;
+            html += `<span>PROM</span></div>`;
+        });
+        container.innerHTML += html + `</div>`;
+    }
+
+    const itemsFoto = ["Buena presencia y puntualidad", "Ejecución Merchandising", "Material P.O.P vigente", "Planograma Marcas", "Exhibidores no invadidos", "Fachada PDV", "Anaquel Principal", "Checkout", "Exhibicion Adicional"];
+    itemsFoto.forEach(i => {
+        document.getElementById('foto-container').innerHTML += `<div><label>${i}</label><input type="file" accept="image/*" capture="environment"></div>`;
+    });
+
+    function generarExcel() {
+        const wb = XLSX.utils.book_new();
+        
+        // Mapeo exhaustivo fila por fila para asegurar fidelidad total
+        const datos = [
+            ["EVALUACION DE ASESOR DE VENTA"],
+            ["Fecha", document.getElementById('fecha').value],
+            ["Empresa", document.getElementById('empresa').value],
+            ["Vendedor", document.getElementById('vendedor').value],
+            ["Evaluador", document.getElementById('evaluador').value],
+            [],
+            ["Actitud de Ventas", "C1", "C2", "C3", "C4", "C5", "PROM 1"],
+            ["Buena presencia y puntualidad"], ["Secuencia de visitas de acuerdo al rutero"],
+            ["Asistencia a reuniones, auditorias, contacto 1 a 1"],
+            ["Organización y Uso de material de trabajo"],
+            ["Toma pedidos y cobranzas en el movil"], ["Informa las incideancias de la ruta"],
+            [],
+            ["Pasos de la visita organizada", "C1", "C2", "C3", "C4", "C5", "PROM 2"],
+            ["Preparación de la visita"], ["Contacto y acercamiento"], ["Chequeo de Inventario"],
+            ["Identificación de oportunidades en el PDV"], ["Ejecución del producto en stock"],
+            ["Asesoramiento y negociación del pedido"], ["Cobranza y cierre de la visita"],
+            [],
+            ["Dominio de ventas", "C1", "C2", "C3", "C4", "C5", "PROM 3"],
+            ["Gestiona todo el portafolio de productos"], ["Ofrece innovaciones o promociones"],
+            ["Revisión y actualización de indicadores de precios en PDV"], ["Negociacion de espacios adicionales"],
+            [],
+            ["Profundidad de lineas", "C1", "C2", "C3", "C4", "C5", "PROM 4"],
+            ["Ofrece Marcas Parmalat, PAVECA, Polar, Pepsi"], ["Ofrece Marcas Isola, Alfonzo Rivas"],
+            ["Ofrece Marcas Alinieve/Giomar, Incosa, Alesca"], ["Ofrece Marcas Miceven, Puig, Gaduca, Calven"],
+            [], ["Total Promedios"], [], ["Puntaje de evaluación"], ["0.- No cumple"],
+            ["1.- Deficiente"], ["2.- Regular"], ["3.- Bueno"], ["4.- Excelente"],
+            ["Nota: Puntuación Máxima de evaluación por item es igual a 4"], [],
+            ["Fortalezas"], [document.getElementById('fortalezas').value], [], [], [], [],
+            ["Debilidades"], [document.getElementById('debilidades').value], [], [], [], [],
+            ["Plan de accion y compromisos"], [document.getElementById('compromisos').value]
+        ];
+
+        const ws = XLSX.utils.aoa_to_sheet(datos);
+        XLSX.utils.book_append_sheet(wb, ws, "Evaluacion");
+        XLSX.writeFile(wb, "Evaluacion_" + (document.getElementById('vendedor').value || "Asesor") + ".xlsx");
+    }
+
+
+    function generarPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.text("Evaluación: " + document.getElementById('vendedor').value, 10, 10);
+        doc.save("Evaluacion_" + (document.getElementById('vendedor').value || "Asesor") + ".pdf");
+    }
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
