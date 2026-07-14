@@ -609,16 +609,17 @@
         }
     }
     <script>
-    // 1. Al cargar la página, recupera lo guardado
-    document.addEventListener('DOMContentLoaded', () => {
+    // Recuperar datos al cargar la página
+    window.onload = () => {
         const inputs = document.querySelectorAll('input, textarea, select');
         inputs.forEach(input => {
-            const savedValue = localStorage.getItem(input.name);
-            if (savedValue) input.value = savedValue;
+            if (input.name && localStorage.getItem(input.name)) {
+                input.value = localStorage.getItem(input.name);
+            }
         });
-    });
+    };
 
-    // 2. Cada vez que escribas algo, guárdalo automáticamente
+    // Guardar datos al escribir
     document.addEventListener('input', (e) => {
         if (e.target.name) {
             localStorage.setItem(e.target.name, e.target.value);
