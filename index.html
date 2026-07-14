@@ -1,10 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <!-- Icono para Android e iPhone -->
-<link rel="apple-touch-icon" href="v2.png">
-<link rel="icon" type="image/png" href="v2.png">
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Evaluación Asesores - Grupo Ontiveros</title>
@@ -14,7 +10,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Evaluación GO">
-    
+    <link rel="apple-touch-icon" href="https://i.imgur.com/2Usc0vR.png">
+    <link rel="icon" type="image/png" href="https://i.imgur.com/2Usc0vR.png">
+
     <!-- Librerías de Excel y PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -244,6 +242,7 @@
     
     <!-- Cabecera Corporativa -->
     <div class="app-header">
+        <img src="https://i.imgur.com/2Usc0vR.png" alt="Logo Grupo Ontiveros">
         <h1>Grupo Ontiveros</h1>
         <p>Sistema de Evaluación de Asesores de Venta</p>
     </div>
@@ -253,19 +252,19 @@
         <h2 class="section-title">Datos Generales</h2>
         <div class="input-group">
             <label>Fecha de Evaluación</label>
-            <input type="date" id="fecha" name="fecha">
+            <input type="date" id="fecha">
         </div>
         <div class="input-group">
             <label>Empresa</label>
-            <input type="text" id="empresa" name="empresa" placeholder="Ej. Dipaca / Inversiones JOL">
+            <input type="text" id="empresa" placeholder="Ej. Dipaca / Inversiones JOL">
         </div>
         <div class="input-group">
             <label>Vendedor (Asesor de Venta)</label>
-            <input type="text" id="vendedor" name="vendedor" placeholder="Nombre completo del asesor">
+            <input type="text" id="vendedor" placeholder="Nombre completo del asesor">
         </div>
         <div class="input-group">
             <label>Evaluador (Supervisor)</label>
-            <input type="text" id="evaluador" name="evaluador" placeholder="Nombre completo del evaluador">
+            <input type="text" id="evaluador" placeholder="Nombre completo del evaluador">
         </div>
     </div>
 
@@ -283,15 +282,15 @@
         <h2 class="section-title">Análisis de Desempeño</h2>
         <div class="input-group">
             <label>Fortalezas</label>
-            <textarea id="fortalezas" name="fortalezas" rows="4" placeholder="Escriba aquí los aspectos fuertes del asesor..."></textarea>
+            <textarea id="fortalezas" rows="4" placeholder="Escriba aquí los aspectos fuertes del asesor..."></textarea>
         </div>
         <div class="input-group" style="margin-top: 15px;">
             <label>Debilidades</label>
-            <textarea id="debilidades" name="debilidades" rows="4" placeholder="Escriba aquí las áreas de mejora..."></textarea>
+            <textarea id="debilidades" rows="4" placeholder="Escriba aquí las áreas de mejora..."></textarea>
         </div>
         <div class="input-group" style="margin-top: 15px;">
             <label>Plan de Acción y Compromisos</label>
-            <textarea id="compromisos" name="compromisos" rows="4" placeholder="Acuerdos y plan de trabajo inmediato..."></textarea>
+            <textarea id="compromisos" rows="4" placeholder="Acuerdos y plan de trabajo inmediato..."></textarea>
         </div>
     </div>
 
@@ -608,26 +607,6 @@
             location.reload();
         }
     }
-    <script>
-    // 1. Guardar automáticamente cada vez que alguien escribe
-    document.addEventListener('input', function(e) {
-        if (e.target.name) {
-            localStorage.setItem(e.target.name, e.target.value);
-        }
-    });
-
-    // 2. Cargar los datos cuando la página esté TOTALMENTE lista
-    window.addEventListener('load', function() {
-        const allInputs = document.querySelectorAll('input, textarea, select');
-        allInputs.forEach(function(input) {
-            if (input.name) {
-                const savedValue = localStorage.getItem(input.name);
-                if (savedValue) {
-                    input.value = savedValue;
-                }
-            }
-        });
-    });
 </script>
 </body>
 </html>
