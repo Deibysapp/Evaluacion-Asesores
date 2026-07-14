@@ -608,6 +608,22 @@
             location.reload();
         }
     }
+    <script>
+    // 1. Al cargar la página, recupera lo guardado
+    document.addEventListener('DOMContentLoaded', () => {
+        const inputs = document.querySelectorAll('input, textarea, select');
+        inputs.forEach(input => {
+            const savedValue = localStorage.getItem(input.name);
+            if (savedValue) input.value = savedValue;
+        });
+    });
+
+    // 2. Cada vez que escribas algo, guárdalo automáticamente
+    document.addEventListener('input', (e) => {
+        if (e.target.name) {
+            localStorage.setItem(e.target.name, e.target.value);
+        }
+    });
 </script>
 </body>
 </html>
