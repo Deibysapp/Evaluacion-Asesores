@@ -609,21 +609,24 @@
         }
     }
     <script>
-    // Recuperar datos al cargar la página
-    window.onload = () => {
-        const inputs = document.querySelectorAll('input, textarea, select');
-        inputs.forEach(input => {
-            if (input.name && localStorage.getItem(input.name)) {
-                input.value = localStorage.getItem(input.name);
-            }
-        });
-    };
-
-    // Guardar datos al escribir
-    document.addEventListener('input', (e) => {
+    // 1. Guardar automáticamente cada vez que alguien escribe
+    document.addEventListener('input', function(e) {
         if (e.target.name) {
             localStorage.setItem(e.target.name, e.target.value);
         }
+    });
+
+    // 2. Cargar los datos cuando la página esté TOTALMENTE lista
+    window.addEventListener('load', function() {
+        const allInputs = document.querySelectorAll('input, textarea, select');
+        allInputs.forEach(function(input) {
+            if (input.name) {
+                const savedValue = localStorage.getItem(input.name);
+                if (savedValue) {
+                    input.value = savedValue;
+                }
+            }
+        });
     });
 </script>
 </body>
